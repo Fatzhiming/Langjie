@@ -1,0 +1,59 @@
+# 量化交易项目配置
+
+exchange:
+  # Polymaker API 配置
+  api_key: "${POLYMAN_API_KEY}"  # 环境变量
+  api_secret: "${POLYMAN_API_SECRET}"
+  sandbox: true  # 先使用沙盒环境
+
+trading:
+  symbol: "BTCUSDT"
+  timeframe: "5m"          # 5 分钟周期
+  direction: "BOTH"        # UP/DOWN 双向交易
+  
+  # 目标指标
+  target_win_rate: 0.6           # 目标胜率 60%
+  target_monthly_orders: 150     # 月订单 150 个
+  
+  # 风险管理
+  max_position_size: 1000        # 最大仓位 (USDT)
+  stop_loss_pct: 0.02            # 止损 2%
+  take_profit_pct: 0.03          # 止盈 3%
+  max_daily_loss: 500            # 每日最大亏损 (USDT)
+  
+  # 订单限制
+  min_order_size: 10             # 最小订单 (USDT)
+  max_open_orders: 5             # 最大同时持仓数
+
+strategy:
+  # 策略选择
+  active_strategies:
+    - momentum
+    - mean_reversion
+  
+  # 参数优化范围
+  momentum:
+    lookback_period: [10, 50]      # 回看周期范围
+    threshold: [0.5, 2.0]          # 阈值范围
+  
+  mean_reversion:
+    ma_period: [20, 100]           # 均线周期
+    std_dev: [1.5, 3.0]            # 标准差倍数
+
+backtest:
+  # 回测配置
+  start_date: "2025-01-01"
+  end_date: "2026-03-01"
+  initial_capital: 10000           # 初始资金 (USDT)
+  commission_rate: 0.001           # 手续费 0.1%
+
+logging:
+  level: "INFO"
+  file: "logs/trading.log"
+  rotation: "daily"
+
+github:
+  # GitHub 部署配置
+  repo: "quant-btcusdt"
+  branch: "main"
+  auto_push: true
