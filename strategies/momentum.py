@@ -78,10 +78,12 @@ class MomentumStrategy(BaseStrategy):
         生成交易信号
         
         逻辑:
-        1. 计算动量
+        1. 计算动量（使用上一根 K 线及之前的数据）
         2. 计算 RSI
         3. 动量 > 阈值 且 RSI < 70 → UP 信号
         4. 动量 < -阈值 且 RSI > 30 → DOWN 信号
+        
+        注意：使用 i-1 时刻的数据，避免未来函数
         """
         prices = data.get('close', [])
         
@@ -90,7 +92,9 @@ class MomentumStrategy(BaseStrategy):
         
         momentum = self.calculate_momentum(prices)
         rsi = self.calculate_rsi(prices)
-        current_price = prices[-1]
+        
+        # 使用上一根 K 线的收盘价作为信号价格（模拟实盘：下一根 K 线开盘开仓）
+        signal_price = prices[-1]
         
         # 计算置信度
         confidence = min(abs(momentum) / self.momentum_threshold, 1.0)
@@ -102,7 +106,7 @@ class MomentumStrategy(BaseStrategy):
                 timestamp=datetime.now(),
                 symbol=data.get('symbol', 'BTCUSDT'),
                 direction='UP',
-                price=current_price,
+                price=signal_price,
                 confidence=confidence,
                 reason=f'Momentum: {momentum:.2f}%, RSI: {rsi:.1f}'
             )
@@ -113,7 +117,7 @@ class MomentumStrategy(BaseStrategy):
                 timestamp=datetime.now(),
                 symbol=data.get('symbol', 'BTCUSDT'),
                 direction='DOWN',
-                price=current_price,
+                price=signal_price,
                 confidence=confidence,
                 reason=f'Momentum: {momentum:.2f}%, RSI: {rsi:.1f}'
             )

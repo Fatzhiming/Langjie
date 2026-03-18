@@ -57,37 +57,37 @@ class Backtest:
         data_dict = self.data_loader.prepare_data(data)
         
         # 遍历数据
-        for i in range(len(data)):
+        for i in range(1, len(data)):  # 从 1 开始，避免 i-1 越界
             current_time = data.index[i]
             current_price = data['close'].iloc[i]
+            prev_price = data['close'].iloc[i-1]  # 上一根 K 线收盘价
             
-            # 更新持仓（检查止损止盈）
-            closed_positions = strategy.update_positions(current_price)
+            # 更新持仓（检查平仓条件）
+            closed_positions = strategy.update_positions(current_price, current_time)
             for cp in closed_positions:
                 self._close_position(cp['position'], cp['close_price'], cp['reason'])
             
-            # 生成信号
-            # 使用截至当前的数据
+            # 生成信号（使用 i-1 时刻的数据，避免未来函数）
             current_data = {
-                'close': data_dict['close'][:i+1],
+                'close': data_dict['close'][:i],  # 只用上一根 K 线及之前的数据
+                'open': data_dict['open'][:i],
                 'symbol': 'BTCUSDT'
             }
             
             signal = strategy.generate_signal(current_data)
             
-            # 执行交易
+            # 执行交易（使用当前 K 线开盘价，模拟实盘）
             if signal and strategy.should_enter(signal):
                 position_size = strategy.calculate_position_size(signal, self.capital)
                 
                 if position_size >= self.config.get('min_order_size', 10):
-                    position = Position(
-                        symbol=signal.symbol,
-                        direction=signal.direction,
-                        entry_price=signal.price,
-                        entry_time=current_time,
+                    # 获取持仓时间配置（默认 1 根 K 线）
+                    hold_period = self.config.get('hold_period', 1)
+                    
+                    position = strategy.create_position(
+                        signal=signal,
                         size=position_size,
-                        stop_loss=strategy.create_stop_loss(signal.price, signal.direction),
-                        take_profit=strategy.create_take_profit(signal.price, signal.direction)
+                        hold_period=hold_period
                     )
                     
                     strategy.positions.append(position)
