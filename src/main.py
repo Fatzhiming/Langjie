@@ -80,12 +80,14 @@ class TradingSystem:
         
         try:
             # 加载数据
-            data_loader = DataLoader(self.config.get('data_dir', 'data'))
+            data_dir = self.config.get('exchange', {}).get('data_dir', 'data')
+            data_loader = DataLoader(data_dir if data_dir else 'data')
             symbol = self.config['trading']['symbol']
             timeframe = self.config['trading']['timeframe']
             
             logger.info(f"加载数据：{symbol} {timeframe}")
-            data = data_loader.get_klines(symbol, timeframe)
+            logger.info(f"数据源：{data_dir}")
+            data = data_loader.get_klines(symbol, timeframe, data_source=data_dir)
             
             # 初始化策略
             strategy_config = self.config['strategy'].get('momentum', {})

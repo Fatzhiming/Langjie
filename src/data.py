@@ -93,20 +93,30 @@ class DataLoader:
         
         return df
     
-    def get_klines(self, symbol: str = 'BTCUSDT', timeframe: str = '5m') -> pd.DataFrame:
+    def get_klines(self, symbol: str = 'BTCUSDT', timeframe: str = '5m', data_source: str = None) -> pd.DataFrame:
         """
         获取指定交易对和周期的 K 线数据
         
         Args:
             symbol: 交易对 (BTCUSDT)
             timeframe: 周期 (5m)
+            data_source: 数据源路径（可选，默认使用项目 data 目录）
         
         Returns:
             DataFrame 包含 OHLCV 数据
         """
-        # 尝试加载数据文件
-        filename = f"{symbol}_{timeframe}.csv"
+        # 如果指定了数据源路径（真实数据目录）
+        if data_source:
+            data_path = Path(data_source)
+            if data_path.exists():
+                # 查找 CSV 文件
+                csv_files = list(data_path.glob("*.csv"))
+                if csv_files:
+                    print(f"📂 从真实数据源加载：{csv_files[0]}")
+                    return self.load_csv(str(csv_files[0]))
         
+        # 尝试加载项目数据目录
+        filename = f"{symbol}_{timeframe}.csv"
         if (self.data_dir / filename).exists():
             return self.load_csv(filename)
         

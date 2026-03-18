@@ -1,10 +1,12 @@
 # 量化交易项目配置
 
 exchange:
-  # Polymaker API 配置
-  api_key: "${POLYMAN_API_KEY}"  # 环境变量
-  api_secret: "${POLYMAN_API_SECRET}"
-  sandbox: true  # 先使用沙盒环境
+  # 币安数据配置（本地文件）
+  data_source: "binance_local"  # 使用本地币安数据
+  data_dir: "E:\\Langjie\\data\\BTCUSDT\\5m"  # 5 分钟数据目录
+  api_key: "${BINANCE_API_KEY}"  # 实盘时使用
+  api_secret: "${BINANCE_API_SECRET}"
+  sandbox: false
 
 trading:
   symbol: "BTCUSDT"
